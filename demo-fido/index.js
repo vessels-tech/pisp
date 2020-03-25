@@ -1,5 +1,5 @@
 
-import { createCredential } from './lib.js'
+import Lib from './lib.js'
 
 
 
@@ -11,13 +11,12 @@ const initialState = {
   selectedAccount: '',
   pispUsername: '',
   pispPassword: '',
-
+  dfspUsername: '',
   sendAmount: 100,
   payeeName: 'Carrie',
   payeeMSISDN: "+61 123 456 789",
   quoteFee: 2, 
 }
-
 var state = {
   ...initialState
 }
@@ -67,8 +66,6 @@ function onPispFormSubmit(event) {
     values[this.name] = $(this).val();
   });
 
-  console.log(values)
-
   setState({
     ...values,
     currentStep: 1,
@@ -87,6 +84,15 @@ function selectBank(bankId) {
 function onDFSPFormSubmit(event) {
   event.preventDefault();
 
+  const inputs = $('#dfspLoginForm :input');
+  const values = {};
+  inputs.each(function (input) {
+    if (!this.name) {
+      return;
+    }
+    values[this.name] = $(this).val();
+  });
+
   setState({
     dfspLoginStep: 2
   })
@@ -100,23 +106,31 @@ function selectAccount(selectedAccount) {
   })
 }
 
-function linkAccount() {
-  //TODO: fido magic here
-  createCredential()
+async function linkAccount() {
+  const options = {
+    name: state.dfspUsername,
+    // Maybe this should be the display name of user, not account...
+    displayName: state.selectedAccount,
+  }
 
-  setState({
-    currentStep: 3
+  Lib.createCredential(options)
+  .then(() => {
+    setState({
+      currentStep: 3
+    })
   })
 }
 
 function sendQuote() {
+  Lib.getQuote();
+
   setState({
     currentStep: 4
   })
 }
 
 function approveTransfer() {
-  console.log("TODO: approve transfer")
+  Lib.sendTransfer()
 }
 
 function rejectTransfer() {
@@ -127,7 +141,6 @@ function rejectTransfer() {
 /* Global State */
 
 function setState(newState) {
-  console.log("updating state")
   const prevState = JSON.parse(JSON.stringify(state))
   state = {
     ...prevState,
@@ -164,7 +177,6 @@ function highlightSection(sectionIndex, shouldScroll = true) {
   Object.keys(pageSections).forEach(sectionName => $(`#${sectionName}`).css({ opacity: 0.5 }))
 
   const highlightId = Object.keys(pageSections)[sectionIndex]
-  console.log("highlightId", highlightId)
   $(`#${highlightId}`).css({ opacity: 1 })
 }
 
@@ -190,7 +202,6 @@ function scrollToAnchor(aid) {
 
 function init() {
   setState({})
-
   highlightSection(0, false)
   showDfspLoginStep(0)
 
@@ -215,4 +226,21 @@ function init() {
 /* Main */
 $(document).ready(function () {
   init()
+
+  // Set state for easily debugging
+  const testState = {
+    currentStep: 2,
+    dfspLoginStep: 4,
+    selectedBank: 'BankA',
+    selectedAccount: '9876',
+    pispUsername: 'sstevens@asthmatickitty.com',
+    pispPassword: '12345',
+    dfspUsername: '111122223333',
+    sendAmount: 100,
+    payeeName: 'Carrie',
+    payeeMSISDN: "+61 123 456 789",
+    quoteFee: 2,
+  }
+  setState({...testState})
+
 });

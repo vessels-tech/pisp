@@ -80,7 +80,7 @@
         <div class="field">
           <label class="label">Client Id</label>
           <div class="control">
-            <input class="input" type="text" placeholder="111122223333">
+            <input name="dfspUsername" class="input" type="text" placeholder="111122223333">
           </div>
         </div>
       
@@ -98,10 +98,49 @@
     </div>
 
     
-    <div id="bankSelectAccount" class="box">
+    <div id="bankSelectAccount">
       <h5 class="title is-5">Select an account:</h5>
-      <button id='selectAccount9876' class="button is-primary">xxxx9876 Savings (BAL: $1,002.24)</button>
-      <button id='selectAccount1234' class="button is-primary">xxxx1234 Spendings (BAL: $54.13) </button>
+      <!-- <button id='selectAccount9876' class="button is-primary">xxxx9876 Savings (BAL: $1,002.24)</button> -->
+
+      <div class="tile">
+        <div style="margin: 1em" class="card notification is-info">
+          <div class="card-content">
+            <p class="title">xxxx9876</p>
+            <p class="subtitle is-5">Savings</p>
+            <p class="title is-6"><b>$1,002.24</b> available</p>
+          </div>
+          <footer class="card-footer">
+            <p class="card-footer-item">
+              <a id='selectAccount9876'>Use this Account</a>
+            </p>
+          </footer>
+        </div>
+
+        <div style="margin: 1em" class="card notification is-danger">
+          <div class="card-content">
+            <p class="title">xxxx1234</p>
+            <p class="subtitle is-5">Spendings</p>
+            <p class="title is-6"><b>$54.13</b> available</p>
+          </div>
+          <footer class="card-footer">
+            <p class="card-footer-item">
+              <a id='selectAccount1234'>Use this Account</a>
+            </p>
+          </footer>
+        </div>
+      </div>
+
+      <!-- <div class="card">
+        <div class="card-content">
+          <p class="title">xxxx1234 - Spendings</p>
+          <p class="subtitle"><b>$54.13</b> available</p>
+        </div>
+        <footer class="card-footer">
+          <p class="card-footer-item">
+            <button id='selectAccount1234' class="button is-primary">Use this Account</button>
+          </p>
+        </footer>
+      </div> -->
     </div>
 
   </section>
@@ -109,7 +148,7 @@
   <!-- 2. linkDevice -->
   <section id="linkDevice" class="section">
     <a class="anchor" name="2" aria-hidden="true">
-      <h2 class="title is-4"><b>3.</b> Link your device with your chosen account</h2>
+      <h2 class="title is-4"><b>2.</b> Link your device with your chosen account</h2>
     </a>
 
     <h5 id="linkAccountText" class="title is-5">Linking {selectedAccount} with this device.</h5>
@@ -120,7 +159,7 @@
   <!-- 3. sendQuote -->
   <section id="sendQuote" class="section">
     <a class="anchor" name="3" aria-hidden="true">
-      <h2 class="title is-4"><b>4.</b> Send off a Quote <i>(mocked)</i></h2>
+      <h2 class="title is-4"><b>3.</b> Send off a Quote <i>(mocked)</i></h2>
     </a>
 
     <div class="box">
@@ -147,7 +186,7 @@
   <!-- 4. approveTransfer -->
   <section id="approveTransfer" name="Content" class="section">
     <a class="anchor" name="4" aria-hidden="true">
-      <h2 class="title is-4"><b>5.</b> Approve the Transfer with your fingerprint</h2>
+      <h2 class="title is-4"><b>4.</b> Approve the Transfer with your fingerprint</h2>
     </a>
 
     <div class="box">
