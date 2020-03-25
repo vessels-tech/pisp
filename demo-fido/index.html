@@ -189,9 +189,12 @@
       <h3 id="transferLine1">You are sending: ${amount} to {payeeName} at {msisdn}</h3>
       <h3 id="transferLine2">This will cost {quoteFee}, and {ammount-quoteFee} will reach.</h3>
       </br>
-      <div class="buttons">
+      <div id="transferButtons" class="buttons">
         <button id="approveTransferButton" class="button is-primary">Approve</button>
         <button id="rejectTransferButton" class="button is-danger">Reject</button>
+      </div>
+      <div style="width: 5em;" id="transferButtonLoader">
+        <progress class="progress is-small is-primary" max="100">15%</progress>
       </div>
     </div>
 

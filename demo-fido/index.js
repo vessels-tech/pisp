@@ -1,6 +1,6 @@
 
-import Lib from './lib.js'
-
+import PISPApi from './PISPApi.js'
+import FidoApi from './FidoApi.js'
 
 
 /* State */
@@ -19,8 +19,11 @@ const initialState = {
   loaders: {
     linkAccountButton: false,
     sendQuoteButton: false,
-  }
+    transferButtons: false
+  },
+  credentialId: '',
 }
+
 var state = {
   ...initialState
 }
@@ -54,12 +57,11 @@ const dynamicText = {
 const loaders = {
   linkAccountButton: '#linkAccountButtonLoader',
   sendQuoteButton: '#sendQuoteButtonLoader',
+  transferButtons: '#transferButtonLoader',
 }
 
 
-
 /* Event Listeners */
-
 function onResetDemo() {
   setState({
     ...initialState
@@ -124,10 +126,12 @@ async function linkAccount() {
   }
 
   waitForLoader('linkAccountButton', true)
-  Lib.createCredential(options)
-  .then(() => {
+  console.log("fidoApi is", FidoApi)
+  FidoApi.createCredential(options)
+  .then(createCredentialResult => {
     setState({
-      currentStep: 3
+      currentStep: 3,
+      credentialId: createCredentialResult.id,
     })
     waitForLoader('linkAccountButton', false)
   })
@@ -149,7 +153,7 @@ function sendQuote() {
 
   
   waitForLoader('sendQuoteButton', true)
-  Lib.getQuote(values)
+  PISPApi.getQuote(values)
   .then(quoteResponse => {
     setState({
       currentStep: 4,
@@ -166,7 +170,16 @@ function sendQuote() {
 }
 
 function approveTransfer() {
-  Lib.sendTransfer()
+  waitForLoader('transferButtons', true)
+
+  PISPApi.sendTransfer(state.credentialId)
+  .then(() => {
+    console.log("transfer sent.")
+    waitForLoader('transferButtons', false)
+  })
+  .catch(err => {
+    waitForLoader('transferButtons', false)
+  })
 }
 
 function rejectTransfer() {
