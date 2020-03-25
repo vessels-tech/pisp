@@ -1,7 +1,36 @@
+import { sleep } from './util.js'
+
 /* Lib file for API and FIDO interactions */
 
 
-/* FIDO */
+/* PISP/Mojaloop API */
+
+/**
+ * @function getQuote
+ * @description Get a quote from the PISP Server
+ * @param {*} quoteRequestOptions
+ * @param {string} quoteRequestOptions.msidn - The party to send to
+ * @param {string} quoteRequestOptions.amount - The amount to send
+ * 
+ */
+async function getQuote(quoteRequestOptions) {
+  //TODO: implement this...
+  await sleep(1000);
+
+  // These are just mock values for now, and are likely to change
+  // We will need the condition in here I think...
+  return {
+    partyName: 'C. Stevens',
+    fee: quoteRequestOptions.amount * 0.1 + 1
+  }
+}
+
+function sendTransfer() {
+  console.log('sending a transfer')
+}
+
+
+/* FIDO Server API*/
 
 /**
  * @function getCredServerOptions
@@ -22,10 +51,21 @@ async function getCredServerOptions() {
     relyingParty,
     userId, //I think this needs to c
   }
-
 }
 
 
+/**
+ * @function registerPublicKey
+ * @param {PublicKeyCredential} publicKey
+ */
+async function registerPublicKey(publicKey) {
+  //TODO: talk to server, give them the PublicKeyCredential the browser made for us
+
+
+  return true;
+}
+
+/* FIDO Functions */
 
 async function createCredential(options) {
   console.log("creating credential!")
@@ -59,22 +99,16 @@ async function createCredential(options) {
   });
 
   console.log("created Credential", credential)
+
+  //Send to the FIDO Server
+  const registerPublicKeyResult = await registerPublicKey(credential)
+
 }
 
 function getAssertion() {
   console.log("getting assertion")
 }
 
-
-/* Mojaloop API */
-
-function getQuote() {
-  console.log('getting a quote')
-}
-
-function sendTransfer() {
-  console.log('sending a transfer')
-}
 
 
 export default {

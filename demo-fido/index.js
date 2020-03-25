@@ -15,7 +15,11 @@ const initialState = {
   sendAmount: 100,
   payeeName: 'Carrie',
   payeeMSISDN: "+61 123 456 789",
-  quoteFee: 2, 
+  fee: 2,
+  loaders: {
+    linkAccountButton: false,
+    sendQuoteButton: false,
+  }
 }
 var state = {
   ...initialState
@@ -44,6 +48,12 @@ const dynamicText = {
   linkAccountText: '#linkAccountText',
   transferLine1: '#transferLine1',
   transferLine2: '#transferLine2',
+}
+
+//Map the button to it's repsective loading indicator
+const loaders = {
+  linkAccountButton: '#linkAccountButtonLoader',
+  sendQuoteButton: '#sendQuoteButtonLoader',
 }
 
 
@@ -113,19 +123,45 @@ async function linkAccount() {
     displayName: state.selectedAccount,
   }
 
+  waitForLoader('linkAccountButton', true)
   Lib.createCredential(options)
   .then(() => {
     setState({
       currentStep: 3
     })
+    waitForLoader('linkAccountButton', false)
+  })
+  .catch(err => {
+    waitForLoader('linkAccountButton', false)
   })
 }
 
 function sendQuote() {
-  Lib.getQuote();
+  event.preventDefault();
+  const inputs = $('#getQuoteForm :input');
+  const values = {};
+  inputs.each(function (input) {
+    if (!this.name) {
+      return;
+    }
+    values[this.name] = $(this).val();
+  });
 
-  setState({
-    currentStep: 4
+  
+  waitForLoader('sendQuoteButton', true)
+  Lib.getQuote(values)
+  .then(quoteResponse => {
+    setState({
+      currentStep: 4,
+      payeeMSISDN: values.msisdn,
+      payeeName: quoteResponse.partyName,
+      sendAmount: values.amount,
+      fee: quoteResponse.fee,
+    })
+    waitForLoader('sendQuoteButton', false)
+  })
+  .catch(err => {
+    waitForLoader('sendQuoteButton', false)
   })
 }
 
@@ -139,6 +175,13 @@ function rejectTransfer() {
 
 
 /* Global State */
+
+function waitForLoader(id, loading = true) {
+  const { loaders } = state;
+  loaders[id] = loading;
+
+  setState({loaders})
+}
 
 function setState(newState) {
   const prevState = JSON.parse(JSON.stringify(state))
@@ -158,14 +201,25 @@ function onStateUpdated(prevState) {
     showDfspLoginStep(state.dfspLoginStep)
   }
 
-
-  //Update text
+  // Update text
   $(dynamicText.loginPromptText).html(state.pispUsername ? `Hi <b>${state.pispUsername}</b>, please login with your DFSP.` : `Please login to proceed`)
   $(dynamicText.selectedBankText).html(`Login with your details to <b>${state.selectedBank}</b>.`)
-
   $(dynamicText.linkAccountText).html(`Linking xxxx${state.selectedAccount} with this device.`)
   $(dynamicText.transferLine1).html(`You are sending: <b>$${state.sendAmount}</b> to <b>${state.payeeName}</b> at <b>${state.payeeMSISDN}</b>`)
-  $(dynamicText.transferLine2).html(`This will cost <b>$${state.quoteFee}</b>, and <b>$${state.sendAmount - state.quoteFee}</b> will reach <b>${state.payeeName}</b>`)
+  $(dynamicText.transferLine2).html(`This will cost <b>$${state.fee}</b>, and <b>$${state.sendAmount - state.fee}</b> will reach <b>${state.payeeName}</b>`)
+
+  // Update Loaders
+  Object.keys(state.loaders).forEach(k => {
+    const visible = state.loaders[k]
+    const id = loaders[k]
+    if (visible) {
+      $(id).show()
+      $(`#${k}`).hide()
+    } else {
+      $(id).hide()
+      $(`#${k}`).show()
+    }
+  })
 }
 
 /* Display Functions */
@@ -193,6 +247,10 @@ function showDfspLoginStep(activeStep) {
   $(activeStepId).show()
 }
 
+function hideLoaders() {
+  Object.values(loaders).forEach(v => $(v).hide())
+}
+
 /* Util Functions */
 function scrollToAnchor(aid) {
   var aTag = $("a[name='" + aid + "']");
@@ -205,9 +263,12 @@ function init() {
   highlightSection(0, false)
   showDfspLoginStep(0)
 
+  hideLoaders()
+
   // Add form selectors
   $('#pispLoginForm').submit(onPispFormSubmit)
   $('#dfspLoginForm').submit(onDFSPFormSubmit)
+  $('#getQuoteForm').submit(sendQuote)
 
   // Button listeners
   $('#selectBankA').on('click', () => selectBank('BankA'));

@@ -129,18 +129,6 @@
           </footer>
         </div>
       </div>
-
-      <!-- <div class="card">
-        <div class="card-content">
-          <p class="title">xxxx1234 - Spendings</p>
-          <p class="subtitle"><b>$54.13</b> available</p>
-        </div>
-        <footer class="card-footer">
-          <p class="card-footer-item">
-            <button id='selectAccount1234' class="button is-primary">Use this Account</button>
-          </p>
-        </footer>
-      </div> -->
     </div>
 
   </section>
@@ -153,6 +141,9 @@
 
     <h5 id="linkAccountText" class="title is-5">Linking {selectedAccount} with this device.</h5>
     <button id="linkAccountButton" class="button is-primary">Link</button>
+    <div style="width: 5em;" id="linkAccountButtonLoader" >
+      <progress class="progress is-small is-primary" max="100">15%</progress>
+    </div>
 
   </section>
 
@@ -162,25 +153,30 @@
       <h2 class="title is-4"><b>3.</b> Send off a Quote <i>(mocked)</i></h2>
     </a>
 
-    <div class="box">
-      <div class="field">
-        <label class="label">MSISDN</label>
+    <form id="getQuoteForm">
+      <div class="box">
+        <div class="field">
+          <label class="label">MSISDN</label>
+          <div class="control">
+            <input name="msisdn" class="input" type="" placeholder="+61 1234 5678">
+          </div>
+        </div>
+      
+        <div class="field">
+          <label class="label">Amount</label>
+          <div class="control">
+            <input name="amount" class="input" type="number" placeholder="$10">
+          </div>
+        </div>
+      
         <div class="control">
-          <input class="input" type="" placeholder="+61 1234 5678">
+          <button id="sendQuoteButton" class="button is-primary">Request Quote</button>
+          <div style="width: 5em;" id="sendQuoteButtonLoader" >
+            <progress class="progress is-small is-primary" max="100">15%</progress>
+          </div>
         </div>
       </div>
-    
-      <div class="field">
-        <label class="label">Amount</label>
-        <div class="control">
-          <input class="input" type="number" placeholder="$10">
-        </div>
-      </div>
-    
-      <div class="control">
-        <button id="sendQuoteButton" class="button is-primary">Request Quote</button>
-      </div>
-    </div>
+    </form>
   </section>
 
   <!-- 4. approveTransfer -->
