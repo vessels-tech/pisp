@@ -2,8 +2,9 @@
 
 import Hapi from '@hapi/hapi'
 import Path from 'path'
-// import { Inert } from 'inert'
-const Inert = require('inert');
+import Inert from 'inert'
+import Routes from './routes'
+// const Inert = require('inert');
 
 const init = async () => {
 
@@ -16,8 +17,9 @@ const init = async () => {
     }
   });
 
-  // Serve static files on /app
+  // @ts-ignore
   await server.register(Inert);
+  // Serve static files on /app
   server.route({
     method: 'GET',
     path: '/app/{param*}',
@@ -28,6 +30,8 @@ const init = async () => {
       }
     }
   });
+
+  server.route(Routes)
 
   await server.start();
   console.log('Server running on %s', server.info.uri);
