@@ -22,6 +22,7 @@ import FidoAPI from './FidoApi.js'
  * @param {*} options 
  */
 async function mock_loginToPISP(options) {
+  console.log("mock logging in to pisp with options", options)
   await sleep(1000);
 
   return {
@@ -42,12 +43,14 @@ async function mock_loginToPISP(options) {
  * 
  */
 async function getQuote(quoteRequestOptions) {
+  
   // TODO: implement this...
   // There is no auth explicitly required here
   await sleep(1000);
-
+  
   // These are just mock values for now, and are likely to change
   // We will need the condition in here I think...
+  console.log("quoteRequestOptions are", quoteRequestOptions)
   return {
     partyName: 'C. Stevens',
     fee: quoteRequestOptions.amount * 0.1 + 1
@@ -119,9 +122,10 @@ async function registerPublicKey(publicKey) {
 
 
 export default {
-  getQuote,
-  sendTransfer,
   getCredServerOptions,
+  getQuote,
+  mock_loginToPISP,
   registerPublicKey,
+  sendTransfer,
   
 }

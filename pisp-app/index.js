@@ -1,4 +1,3 @@
-
 import PISPApi from './PISPApi.js'
 import FidoApi from './FidoApi.js'
 import {
@@ -37,7 +36,7 @@ const pageSections = {
   pispLogin: 0,
   dfspLogin: 1,
   linkDevice: 2,
-  sendQuote: 3,
+  sendQuoteSection: 3,
   approveTransfer: 4,
 }
 
@@ -72,6 +71,7 @@ const dynamicText = {
 
 //Map the button to it's repsective loading indicator
 const loaders = {
+  pispLoginButton: '#pispLoginButtonLoader',
   linkAccountButton: '#linkAccountButtonLoader',
   sendQuoteButton: '#sendQuoteButtonLoader',
   transferButtons: '#transferButtonLoader',
@@ -85,14 +85,17 @@ function onResetDemo() {
 }
 
 function onPispFormSubmit(formValues) {
-  // TODO: api call, loader
+  const loginToPISP = wrapLoaderFunction(PISPApi.mock_loginToPISP, 'pispLoginButton')
 
-  setState({
-    ...formValues,
-    currentStep: 1,
+  loginToPISP(formValues)
+  .then((result) => {
+    console.log("result", result)
+    setState({
+      ...formValues,
+      currentStep: 1,
+    })
   })
-
-  event.preventDefault();
+  .catch(err => console.log("Err in loginToPisp", err))
 }
 
 function selectBank(bankId) {
@@ -119,29 +122,27 @@ function selectAccount(selectedAccount) {
 }
 
 async function linkAccount() {
+  const createCredential = wrapLoaderFunction(FidoApi.createCredential, 'linkAccountButton')
   const options = {
     name: state.dfspUsername,
     // Maybe this should be the display name of user, not account...
     displayName: state.selectedAccount,
   }
 
-  waitForLoader('linkAccountButton', true)
-  FidoApi.createCredential(options)
+  createCredential(options)
   .then(createCredentialResult => {
     setState({
       currentStep: 3,
       credentialId: createCredentialResult.id,
     })
-    waitForLoader('linkAccountButton', false)
-  })
-  .catch(err => {
-    waitForLoader('linkAccountButton', false)
   })
 }
 
 function sendQuote(formValues) { 
-  waitForLoader('sendQuoteButton', true)
-  PISPApi.getQuote(formValues)
+  const getQuote = wrapLoaderFunction(PISPApi.getQuote, 'sendQuoteButton')
+  console.log("formValues", formValues)
+
+  getQuote(formValues)
   .then(quoteResponse => {
     setState({
       currentStep: 4,
@@ -150,10 +151,6 @@ function sendQuote(formValues) {
       payeeName: quoteResponse.partyName,
       fee: quoteResponse.fee,
     })
-    waitForLoader('sendQuoteButton', false)
-  })
-  .catch(err => {
-    waitForLoader('sendQuoteButton', false)
   })
 }
 
@@ -176,6 +173,26 @@ function rejectTransfer() {
 
 
 /* Global State */
+
+/**
+ * @description Wrap an async call with "waitForLoader" calls
+ */
+function wrapLoaderFunction(myAsyncFunction, buttonId) {
+  waitForLoader(buttonId, true)
+
+  return (...args) => {
+    return myAsyncFunction(...args)
+      .then((result) => {
+        waitForLoader(buttonId, false)
+        return result
+      })
+      .catch(err => {
+        waitForLoader(buttonId, false)
+        // re-throw error to escape
+        throw err
+      })
+  }
+}
 
 function waitForLoader(id, loading = true) {
   const { loaders } = state;
@@ -280,7 +297,7 @@ function init() {
   $('#selectAccount9876').on('click', () => selectAccount('9876'));
   $('#selectAccount1234').on('click', () => selectAccount('1234'));
   $('#linkAccountButton').on('click', () => linkAccount());
-  $('#sendQuoteButton').on('click', () => sendQuote());
+  // $('#sendQuoteButton').on('click', () => sendQuote());
   $('#approveTransferButton').on('click', () => approveTransfer());
   $('#rejectTransferButton').on('click', () => rejectTransfer());
   $('#resetDemo').on('click', () => onResetDemo());
@@ -306,6 +323,6 @@ $(document).ready(function () {
     payeeMSISDN: "+61 123 456 789",
     quoteFee: 2,
   }
-  // setState({...testState})
 
+  setState({...testState})
 });

@@ -52,7 +52,10 @@
           </div>
 
           <div class="control">
-            <button class="button is-primary">Login</button>
+            <button id="pispLoginButton" class="button is-primary">Login</button>
+          </div>
+          <div style="width: 5em;" id="pispLoginButtonLoader">
+            <progress class="progress is-small is-primary" max="100">15%</progress>
           </div>
         </form>
       </div>
@@ -146,7 +149,7 @@
   </section>
 
   <!-- 3. sendQuote -->
-  <section id="sendQuote" class="section">
+  <section id="sendQuoteSection" class="section">
     <div class="container">
       <a class="anchor" name="3" aria-hidden="true">
         <h2 class="title is-4"><b>3.</b> Send off a Quote <i>(mocked)</i></h2>
@@ -157,14 +160,14 @@
           <div class="field">
             <label class="label">MSISDN</label>
             <div class="control">
-              <input name="msisdn" class="input" type="" placeholder="+61 1234 5678">
+              <input name="msisdn" class="input" type="" placeholder="+61 1234 5678" value="+61 1234 5678">
             </div>
           </div>
         
           <div class="field">
             <label class="label">Amount</label>
             <div class="control">
-              <input name="amount" class="input" type="number" placeholder="$10">
+              <input name="amount" class="input" type="number" placeholder="$10" value="100">
             </div>
           </div>
         

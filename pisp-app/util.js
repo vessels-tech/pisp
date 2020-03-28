@@ -5,7 +5,6 @@ export async function sleep(timeMs) {
 }
 
 export function getFormValues(formId) {
-  // const inputs = $('#pispLoginForm :input');
   const inputs = $(`${formId} :input`);
   const values = {};
   inputs.each(function (input) {
