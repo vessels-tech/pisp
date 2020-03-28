@@ -65,14 +65,22 @@ async function mock_getDFSPAccountMetadata(token) {
   // TODO: implement full demo account metadata
   const mockAccounts = [
     {
+      id: '9876',
       name: 'xxxx9876',
       nickname: 'Savings',
       balance: '$1,002.24'
     },
     {
+      id: '1234',
       name: 'xxxx1234',
       nickname: 'Spendings',
       balance: '$52.13'
+    },
+    {
+      id: '5678',
+      name: 'xxxx5678',
+      nickname: 'Chequing',
+      balance: '$100.34'
     },
   ]
 

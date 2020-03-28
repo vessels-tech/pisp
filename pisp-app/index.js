@@ -256,8 +256,9 @@ function onStateUpdated(prevState) {
     const tiles = state.accountList.reduce((acc, curr, idx) => acc + Templates.accountTile(curr, idx), "")    
     $('#bankSelectAccountList').html(tiles)
     
-    state.accountList.forEach(acc => {
-      $(`#selectAccount${acc.id}`).on('click', () => selectAccount(acc.id));
+    state.accountList.forEach(account => {
+      console.log("adding account to selector", account.id)
+      $(`#selectAccount${account.id}`).on('click', () => selectAccount(account.id));
     })
 
     // TODO: add selectors:
