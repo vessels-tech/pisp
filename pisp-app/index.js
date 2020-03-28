@@ -1,6 +1,9 @@
 
 import PISPApi from './PISPApi.js'
 import FidoApi from './FidoApi.js'
+import {
+  getFormValues
+} from './util.js'
 
 
 /* State */
@@ -30,7 +33,6 @@ var state = {
 
 
 /* Page Helpers */
-
 const pageSections = {
   pispLogin: 0,
   dfspLogin: 1,
@@ -39,10 +41,25 @@ const pageSections = {
   approveTransfer: 4,
 }
 
+const forms = {
+  pispLoginForm: {
+    id: '#pispLoginForm',
+    onSubmitFunc: onPispFormSubmit,
+  },
+  dfspLoginForm: {
+    id: '#dfspLoginForm',
+    onSubmitFunc: onDFSPFormSubmit,
+  },
+  getQuoteForm: {
+    id: '#getQuoteForm',
+    onSubmitFunc: sendQuote,
+  },
+}
+
 const bankSections = {
-  bankSelector: '#bankSelector', //0
-  bankLogin: '#bankLogin', //1
-  bankSelectAccount: '#bankSelectAccount', //2
+  bankSelector: '#bankSelector', // 0
+  bankLogin: '#bankLogin', // 1
+  bankSelectAccount: '#bankSelectAccount', // 2
 }
 
 const dynamicText = {
@@ -60,7 +77,6 @@ const loaders = {
   transferButtons: '#transferButtonLoader',
 }
 
-
 /* Event Listeners */
 function onResetDemo() {
   setState({
@@ -68,18 +84,11 @@ function onResetDemo() {
   })
 }
 
-function onPispFormSubmit(event) {
-  const inputs = $('#pispLoginForm :input');
-  const values = {};
-  inputs.each(function (input) {
-    if (!this.name) {
-      return;
-    }
-    values[this.name] = $(this).val();
-  });
+function onPispFormSubmit(formValues) {
+  // TODO: api call, loader
 
   setState({
-    ...values,
+    ...formValues,
     currentStep: 1,
   })
 
@@ -93,17 +102,8 @@ function selectBank(bankId) {
   })
 }
 
-function onDFSPFormSubmit(event) {
-  event.preventDefault();
-
-  const inputs = $('#dfspLoginForm :input');
-  const values = {};
-  inputs.each(function (input) {
-    if (!this.name) {
-      return;
-    }
-    values[this.name] = $(this).val();
-  });
+function onDFSPFormSubmit(formValues) {
+  //TODO: Api call
 
   setState({
     dfspLoginStep: 2
@@ -139,26 +139,15 @@ async function linkAccount() {
   })
 }
 
-function sendQuote() {
-  event.preventDefault();
-  const inputs = $('#getQuoteForm :input');
-  const values = {};
-  inputs.each(function (input) {
-    if (!this.name) {
-      return;
-    }
-    values[this.name] = $(this).val();
-  });
-
-  
+function sendQuote(formValues) { 
   waitForLoader('sendQuoteButton', true)
-  PISPApi.getQuote(values)
+  PISPApi.getQuote(formValues)
   .then(quoteResponse => {
     setState({
       currentStep: 4,
-      payeeMSISDN: values.msisdn,
+      payeeMSISDN: formValues.msisdn,
+      sendAmount: formValues.amount,
       payeeName: quoteResponse.partyName,
-      sendAmount: values.amount,
       fee: quoteResponse.fee,
     })
     waitForLoader('sendQuoteButton', false)
@@ -235,7 +224,6 @@ function onStateUpdated(prevState) {
 }
 
 /* Display Functions */
-
 function highlightSection(sectionIndex, shouldScroll = true) {
   if (shouldScroll) {
     scrollToAnchor(sectionIndex);
@@ -277,10 +265,14 @@ function init() {
 
   hideLoaders()
 
-  // Add form selectors
-  $('#pispLoginForm').submit(onPispFormSubmit)
-  $('#dfspLoginForm').submit(onDFSPFormSubmit)
-  $('#getQuoteForm').submit(sendQuote)
+  // Add form selectors, with helper function wrappers
+  Object.values(forms).forEach(({ id, onSubmitFunc }) => {
+    $(id).submit((event) => {
+      event.preventDefault();
+        const formValues = getFormValues(id)
+      return onSubmitFunc(formValues)
+    })
+  })
 
   // Button listeners
   $('#selectBankA').on('click', () => selectBank('BankA'));
@@ -314,6 +306,6 @@ $(document).ready(function () {
     payeeMSISDN: "+61 123 456 789",
     quoteFee: 2,
   }
-  setState({...testState})
+  // setState({...testState})
 
 });
