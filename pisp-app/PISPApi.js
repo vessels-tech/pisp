@@ -2,8 +2,36 @@ import { sleep } from './util.js'
 import FidoAPI from './FidoApi.js'
 
 
+/**
+ * @file PISPApi.js
+ * @description 
+ *   The API for talking to the PISP-Server. All calls go through
+ *   the PISP Server, but some are forwarded onto mojaloop and routed
+ *   to different services, such as the `central-fido` server and DFSPs
+ * @author Lewis Daly
+ */
 
-/* PISP/Mojaloop API */
+
+/* --- Generic PISP Functions --- */
+
+
+/**
+ * @function mock_loginToPISP
+ * @description Logs into the PISP. This is a mock function so assumes a user
+ *   already exists
+ * @param {*} options 
+ */
+async function mock_loginToPISP(options) {
+  await sleep(1000);
+
+  return {
+    ...options
+  }
+}
+
+
+
+/* --- Mojaloop Functions --- */
 
 /**
  * @function getQuote
@@ -53,7 +81,7 @@ async function sendTransfer(credentialId) {
 }
 
 
-/* FIDO Server API */
+/* ---  FIDO Server Functions --- */
 
 /**
  * @function getCredServerOptions

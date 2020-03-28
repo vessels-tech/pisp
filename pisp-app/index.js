@@ -126,7 +126,6 @@ async function linkAccount() {
   }
 
   waitForLoader('linkAccountButton', true)
-  console.log("fidoApi is", FidoApi)
   FidoApi.createCredential(options)
   .then(createCredentialResult => {
     setState({
