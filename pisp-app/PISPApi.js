@@ -14,11 +14,13 @@ import FidoAPI from './FidoApi.js'
 
 /* --- Generic PISP Functions --- */
 
-
 /**
  * @function mock_loginToPISP
  * @description Logs into the PISP. This is a mock function so assumes a user
  *   already exists
+ * 
+ *   pisp-app ---> pisp-server
+ * 
  * @param {*} options 
  */
 async function mock_loginToPISP(options) {
@@ -30,6 +32,53 @@ async function mock_loginToPISP(options) {
   }
 }
 
+/**
+ * @function mock_loginToDFSP
+ * @description Logs into the DFSP with the user's supplied credentials.
+ *   This will return some sort of token the PISP can use to talk to the 
+ *   DFSP on the User's behalf
+ * 
+ *   pisp-app -> pisp-server -> ml-switch -> DFSP
+ * 
+ * @param {*} options 
+ */
+async function mock_loginToDFSP(options) {
+  await sleep(1000);
+
+  return {
+    ...options
+  }
+}
+
+/**
+ * @function mock_getDFSPAccountMetadata
+ * @description Using the token supplied from `mock_loginToDFSP`, ask
+ *   the DFSP for a list of accounts and balances on behalf of the user
+ * 
+ *   pisp-app -> pisp-server -> ml-switch -> DFSP
+ * 
+ * @param {*} options 
+ */
+async function mock_getDFSPAccountMetadata(token) {
+  await sleep(1000);
+
+  // TODO: implement full demo account metadata
+  const mockAccounts = [
+    {
+      name: 'xxxx9876',
+      nickname: 'Savings',
+      balance: '$1,002.24'
+    },
+    {
+      name: 'xxxx1234',
+      nickname: 'Spendings',
+      balance: '$52.13'
+    },
+  ]
+
+  return mockAccounts
+}
+
 
 
 /* --- Mojaloop Functions --- */
@@ -37,20 +86,23 @@ async function mock_loginToPISP(options) {
 /**
  * @function getQuote
  * @description Get a quote from the PISP Server
+ * 
+ *
+ *   pisp-app -> pisp-server -> ml-switch -> DFSP ?
+ *
+ * 
  * @param {*} quoteRequestOptions
  * @param {string} quoteRequestOptions.msidn - The party to send to
  * @param {string} quoteRequestOptions.amount - The amount to send
  * 
  */
 async function getQuote(quoteRequestOptions) {
-  
   // TODO: implement this...
   // There is no auth explicitly required here
   await sleep(1000);
   
   // These are just mock values for now, and are likely to change
   // We will need the condition in here I think...
-  console.log("quoteRequestOptions are", quoteRequestOptions)
   return {
     partyName: 'C. Stevens',
     fee: quoteRequestOptions.amount * 0.1 + 1
@@ -60,6 +112,10 @@ async function getQuote(quoteRequestOptions) {
 /**
  * @function sendTransfer
  * @description Send the transfer, with the challenge signed by the FIDO
+ *
+ *   pisp-app -> pisp-server -> ml-switch
+ *
+ * 
  * @param {*} sendTranferOptions
  * Note: in this example, we save the credentialId locally, but I think it's more canonical for
  * the FIDO server to keep track of this for us.  
@@ -89,6 +145,9 @@ async function sendTransfer(credentialId) {
 /**
  * @function getCredServerOptions
  * @description Gets the necessary things we need from the server. Mocked out for now
+ *
+ *   pisp-app -> pisp-server -> ml-switch -> central-fido
+ *
  * @todo: Implement fully
  */
 async function getCredServerOptions() {
@@ -109,9 +168,12 @@ async function getCredServerOptions() {
   }
 }
 
-
 /**
  * @function registerPublicKey
+ * @description Registers the public key created locally with the FIDO server
+ *
+ *   pisp-app -> pisp-server -> ml-switch -> central-fido
+ *
  * @param {PublicKeyCredential} publicKey
  */
 async function registerPublicKey(publicKey) {
@@ -121,10 +183,13 @@ async function registerPublicKey(publicKey) {
 }
 
 
+
 export default {
   getCredServerOptions,
   getQuote,
   mock_loginToPISP,
+  mock_loginToDFSP,
+  mock_getDFSPAccountMetadata,
   registerPublicKey,
   sendTransfer,
   

@@ -1,5 +1,6 @@
 import PISPApi from './PISPApi.js'
 import FidoApi from './FidoApi.js'
+import Templates from './Templates.js'
 import {
   getFormValues
 } from './util.js'
@@ -10,6 +11,7 @@ const initialState = {
   currentStep: 0,
   dfspLoginStep: 0,
   selectedBank: '',
+  accountList: [],
   selectedAccount: '',
   pispUsername: '',
   pispPassword: '',
@@ -106,10 +108,16 @@ function selectBank(bankId) {
 }
 
 function onDFSPFormSubmit(formValues) {
-  //TODO: Api call
+  //TODO: loaders?
+  console.log("logging in and getting accounts!")
 
-  setState({
-    dfspLoginStep: 2
+  PISPApi.mock_loginToDFSP(formValues)
+  .then((token) => PISPApi.mock_getDFSPAccountMetadata(token))
+  .then((accountList) => {
+    setState({
+      dfspLoginStep: 2,
+      accountList,
+    })
   })
 }
 
@@ -140,7 +148,6 @@ async function linkAccount() {
 
 function sendQuote(formValues) { 
   const getQuote = wrapLoaderFunction(PISPApi.getQuote, 'sendQuoteButton')
-  console.log("formValues", formValues)
 
   getQuote(formValues)
   .then(quoteResponse => {
@@ -155,15 +162,14 @@ function sendQuote(formValues) {
 }
 
 function approveTransfer() {
-  waitForLoader('transferButtons', true)
+  const sendTransfer = wrapLoaderFunction(PISPApi.sendTransfer, 'transferButtons')
 
-  PISPApi.sendTransfer(state.credentialId)
+  sendTransfer(state.credentialId)
   .then(() => {
-    console.log("transfer sent.")
-    waitForLoader('transferButtons', false)
+    window.alert("Your money is on its way!")
   })
   .catch(err => {
-    waitForLoader('transferButtons', false)
+    window.alert("Failed to send transfer! Error details: " + err)
   })
 }
 
@@ -238,6 +244,26 @@ function onStateUpdated(prevState) {
       $(`#${k}`).show()
     }
   })
+
+  // Re-render the account list if needed
+  const prevAccListHash = prevState.accountList.reduce((acc, curr) => acc + curr.id, '');
+  const currAccListHash = state.accountList.reduce((acc, curr) => acc + curr.id, '');
+  console.log("state changed, checking account list", prevAccListHash, currAccListHash)
+
+  if (prevAccListHash !== currAccListHash) {
+    $('#bankSelectAccountList').html('')
+  
+    const tiles = state.accountList.reduce((acc, curr, idx) => acc + Templates.accountTile(curr, idx), "")    
+    $('#bankSelectAccountList').html(tiles)
+    
+    state.accountList.forEach(acc => {
+      $(`#selectAccount${acc.id}`).on('click', () => selectAccount(acc.id));
+    })
+
+    // TODO: add selectors:
+    // $('#selectAccount9876').on('click', () => selectAccount('9876'));
+    // $('#selectAccount1234').on('click', () => selectAccount('1234'));
+  }
 }
 
 /* Display Functions */
@@ -297,7 +323,6 @@ function init() {
   $('#selectAccount9876').on('click', () => selectAccount('9876'));
   $('#selectAccount1234').on('click', () => selectAccount('1234'));
   $('#linkAccountButton').on('click', () => linkAccount());
-  // $('#sendQuoteButton').on('click', () => sendQuote());
   $('#approveTransferButton').on('click', () => approveTransfer());
   $('#rejectTransferButton').on('click', () => rejectTransfer());
   $('#resetDemo').on('click', () => onResetDemo());
@@ -322,7 +347,8 @@ $(document).ready(function () {
     payeeName: 'Carrie',
     payeeMSISDN: "+61 123 456 789",
     quoteFee: 2,
+    accountList: [],
   }
 
-  setState({...testState})
+  // setState({...testState})
 });
