@@ -24,7 +24,6 @@ import FidoAPI from './FidoApi.js'
  * @param {*} options 
  */
 async function mock_loginToPISP(options) {
-  console.log("mock logging in to pisp with options", options)
   await sleep(1000);
 
   return {
@@ -43,7 +42,8 @@ async function mock_loginToPISP(options) {
  * @param {*} options 
  */
 async function mock_loginToDFSP(options) {
-  await sleep(1000);
+  // TODO: perform login and get token
+  await sleep(100);
 
   return {
     ...options
@@ -60,9 +60,9 @@ async function mock_loginToDFSP(options) {
  * @param {*} options 
  */
 async function mock_getDFSPAccountMetadata(token) {
-  await sleep(1000);
-
   // TODO: implement full demo account metadata
+  await sleep(1);
+
   const mockAccounts = [
     {
       id: '9876',
@@ -113,7 +113,7 @@ async function getQuote(quoteRequestOptions) {
   // We will need the condition in here I think...
   return {
     partyName: 'C. Stevens',
-    fee: quoteRequestOptions.amount * 0.1 + 1
+    fee: quoteRequestOptions.amount * 0.05 + 1
   }
 }
 
@@ -130,7 +130,6 @@ async function getQuote(quoteRequestOptions) {
  *
  */
 async function sendTransfer(credentialId) {
-  console.log('sending a transfer')
   await sleep(1200)
 
   const assertionOptions = { 

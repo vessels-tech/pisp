@@ -3,7 +3,6 @@ import PISPApi from './PISPApi.js'
 
 async function createCredential(options) {
   const serverOptions = await PISPApi.getCredServerOptions()
-  console.log("helo", serverOptions)
   const { name, displayName } = options
   const { challenge, relyingParty, userId } = serverOptions;
 

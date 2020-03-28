@@ -91,7 +91,6 @@ function onPispFormSubmit(formValues) {
 
   loginToPISP(formValues)
   .then((result) => {
-    console.log("result", result)
     setState({
       ...formValues,
       currentStep: 1,
@@ -109,8 +108,6 @@ function selectBank(bankId) {
 
 function onDFSPFormSubmit(formValues) {
   //TODO: loaders?
-  console.log("logging in and getting accounts!")
-
   PISPApi.mock_loginToDFSP(formValues)
   .then((token) => PISPApi.mock_getDFSPAccountMetadata(token))
   .then((accountList) => {
@@ -248,22 +245,13 @@ function onStateUpdated(prevState) {
   // Re-render the account list if needed
   const prevAccListHash = prevState.accountList.reduce((acc, curr) => acc + curr.id, '');
   const currAccListHash = state.accountList.reduce((acc, curr) => acc + curr.id, '');
-  console.log("state changed, checking account list", prevAccListHash, currAccListHash)
-
   if (prevAccListHash !== currAccListHash) {
     $('#bankSelectAccountList').html('')
   
     const tiles = state.accountList.reduce((acc, curr, idx) => acc + Templates.accountTile(curr, idx), "")    
     $('#bankSelectAccountList').html(tiles)
     
-    state.accountList.forEach(account => {
-      console.log("adding account to selector", account.id)
-      $(`#selectAccount${account.id}`).on('click', () => selectAccount(account.id));
-    })
-
-    // TODO: add selectors:
-    // $('#selectAccount9876').on('click', () => selectAccount('9876'));
-    // $('#selectAccount1234').on('click', () => selectAccount('1234'));
+    state.accountList.forEach(account => $(`#selectAccount${account.id}`).on('click', () => selectAccount(account.id)))
   }
 }
 
