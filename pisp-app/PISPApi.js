@@ -1,5 +1,6 @@
 import { sleep } from './util.js'
 import FidoAPI from './FidoApi.js'
+import Config from './Config.js';
 
 
 /**
@@ -16,8 +17,8 @@ import FidoAPI from './FidoApi.js'
 
 /**
  * @function mock_loginToPISP
- * @description Logs into the PISP. This is a mock function so assumes a user
- *   already exists
+ * @description Logs into the PISP. This is a mock function that assumes a user
+ *   already exists. Outside the scope of this demo (and the Mojaloop API)
  * 
  *   pisp-app ---> pisp-server
  * 
@@ -32,35 +33,43 @@ async function mock_loginToPISP(options) {
 }
 
 /**
- * @function mock_loginToDFSP
- * @description Logs into the DFSP with the user's supplied credentials.
- *   This will return some sort of token the PISP can use to talk to the 
- *   DFSP on the User's behalf
- * 
- *   pisp-app -> pisp-server -> ml-switch -> DFSP
- * 
+ * @function mock_getDFSPLoginPage
  * @param {*} options 
  */
-async function mock_loginToDFSP(options) {
-  // TODO: perform login and get token
-  await sleep(100);
 
-  return {
-    ...options
-  }
-}
 
 /**
- * @function mock_getDFSPAccountMetadata
- * @description Using the token supplied from `mock_loginToDFSP`, ask
+ * @function getDFSPAccountMetadata
+ * @description Using the token supplied from `onUserLoggedIn`, ask
  *   the DFSP for a list of accounts and balances on behalf of the user
  * 
  *   pisp-app -> pisp-server -> ml-switch -> DFSP
  * 
  * @param {*} options 
  */
-async function mock_getDFSPAccountMetadata(token) {
-  // TODO: implement full demo account metadata
+async function getDFSPAccountMetadata() {
+  /*
+    This endpoint is conditional on user login. Perhaps it should fail
+    if the user hasn't logged in yet
+
+    On the client, side, the easiest thing to do for the demo is poll
+    this and wait until we get an answer back. We'll likely need some controls
+    around how old the data is, but that will be left up to the PISP to implement
+
+    For the purposes of the demo, we will use this endpoint for both the initial 
+    linking and accessing metadata before initiating a transfer, but these 2 things
+    may end up looking different depending on the authorization models we choose to
+    go with
+  */
+
+  // TODO: replace with MojaloopApi call
+  // 1. Lookup if we have the token.
+  // 2. If not, fail with some error code
+  // 3. If we do have the token, call MojallopApi.getParty and pass on the token
+  // 4. Return the account metadata from getParty
+  //
+
+  
   await sleep(1);
 
   const mockAccounts = [
@@ -88,26 +97,29 @@ async function mock_getDFSPAccountMetadata(token) {
 }
 
 
-
 /* --- Mojaloop Functions --- */
 
 /**
- * @function getQuote
- * @description Get a quote from the PISP Server
- * 
+ * @function getQuoteAndPendingAuth
+ * @description Get a saved quote and pending authorization object from the PISP Server. 
+ *  This relies on `onQuoteResponse` and `onAuthRequest` to have been called first.
  *
- *   pisp-app -> pisp-server -> ml-switch -> DFSP ?
+ *   pisp-app -> pisp-server
  *
  * 
  * @param {*} quoteRequestOptions
- * @param {string} quoteRequestOptions.msidn - The party to send to
- * @param {string} quoteRequestOptions.amount - The amount to send
+ * @param {string} quoteRequestOptions.id - The transfer id
  * 
  */
-async function getQuote(quoteRequestOptions) {
+async function getQuoteAndPendingAuth(quoteRequestOptions) {
   // TODO: implement this...
-  // There is no auth explicitly required here
-  await sleep(1000);
+  // 1. Lookup the quote to see if we've received a response yet
+  // 2. if not, return a 404
+  // 3. if we have a quote, make sure we have the authorization object as well
+  // 4. if so, return the quote response and authorization obejct
+  //
+  // For the sake of the demo, the app can poll the server on a regular interval
+  // as it waits for the response to come back
   
   // These are just mock values for now, and are likely to change
   // We will need the condition in here I think...
@@ -151,28 +163,18 @@ async function sendTransfer(credentialId) {
 
 /**
  * @function getCredServerOptions
- * @description Gets the necessary things we need from the server. Mocked out for now
+ * @description Gets the necessary things we need from the server.
  *
  *   pisp-app -> pisp-server -> ml-switch -> central-fido
  *
  * @todo: Implement fully
  */
 async function getCredServerOptions() {
-  // TODO: implement properly, these are mock values only.
-  // Some of these values will come from the DFSP, others from the PISP, others from the shared FIDO
-  const challenge = "challenge:12345"
-  const relyingParty = {
-    name: "Mojaloop Shared FIDO",
-    // important, must be same as webpage.
-    id: "localhost",
-  }
-  const userId = "userid:12345"
+  const url = `${Config.host}/fido/options`
+  const options = { }
 
-  return {
-    challenge,
-    relyingParty,
-    userId,
-  }
+  const rawResponse = await fetch(url, options)
+  return rawResponse.json()
 }
 
 /**
@@ -189,15 +191,74 @@ async function registerPublicKey(publicKey) {
   return true;
 }
 
+/* ---  Callbacks from Mojaloop Switch --- */
+
+/**
+ * @function onUserLoggedIn
+ * @description Callback for when user has logged in with DFSP
+ *   and given access to PISP to view their accounts
+ * 
+ *   DFSP -> ml-switch -> pisp-server
+ * 
+ * @param {*} options 
+ */
+async function onUserLoggedIn(token) {
+  //TODO:
+  // 1. save this token somewhere
+
+  await sleep(100);
+
+  return {
+    ...options
+  }
+}
+
+
+/**
+ * @function onQuoteResponse
+ * @description Callback for when a quote has been made for the transfer, and
+ *   returned to the PISP to present to the user
+ * 
+ *   DFSP -> ml-switch -> pisp-server
+ * 
+ * @param {*} options 
+ */
+async function onQuoteResponse(opts: any) {
+  //TODO: store the quote request
+
+
+  return true
+}
+
+/**
+ * @function onAuthRequest
+ * @description Callback for when the Payer DFSP has requested authorization
+ *   for the transaction request
+ * 
+ *   DFSP -> ml-switch -> pisp-server
+ * 
+ * @param {*} options 
+ */
+async function onAuthRequest(opts: any) {
+  //TODO: 
+  // 1. lookup the quote and verify it exists
+  // 2. if not, return some error? or just 202 no matter what?
+  // 3. 
+  //Save the the auth request for the user to lookup
+
+  return true
+}
+
 
 
 export default {
   getCredServerOptions,
-  getQuote,
   mock_loginToPISP,
-  mock_loginToDFSP,
-  mock_getDFSPAccountMetadata,
+  getDFSPAccountMetadata,
   registerPublicKey,
+  onQuoteResponse,
+  onAuthRequest,
+  onUserLoggedIn,
   sendTransfer,
   
 }

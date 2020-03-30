@@ -7,7 +7,6 @@ import Routes from './routes'
 // const Inert = require('inert');
 
 const init = async () => {
-
   const server = new Hapi.Server({
     port: 3000,
     routes: {
@@ -31,6 +30,7 @@ const init = async () => {
     }
   });
 
+  // Register all routes
   server.route(Routes)
 
   await server.start();
