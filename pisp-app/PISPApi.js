@@ -35,6 +35,29 @@ async function mock_loginToPISP(options) {
 }
 
 /**
+ * @function mock_loginToDFSP
+ * @description Logs into the DFSP. This should be outside the scope of the pisp app
+ *   since the user will be using a separate deep linked app or embedded iframe.
+ * 
+ *   For the purposes of this demo, it will perform a fake "login", and call
+ *   the 'onUserLoggedIn' callback of the PISP to mock out this flow.
+ * 
+ *   pisp-app -> dfsp 
+ * 
+ * @param {*} options 
+ */
+async function mock_loginToDFSP(options) {
+  await sleep(1000);
+
+
+  // TODO: call POST onUserLoggedIn with dummy token
+
+  return {
+    ...options
+  }
+}
+
+/**
  * @function getDFSPLoginPage
  * @param {*} options 
  */
@@ -44,23 +67,54 @@ async function getDFSPLoginPage() {
 
 }
 
-
-
 /**
  * @function getDFSPAccountMetadata
- * @description Using the token supplied from `onUserLoggedIn`, ask
- *   the DFSP for a list of accounts and balances on behalf of the user
+ * @description After `onUserLoggedIn` is called on the PISP, it 
+ *   will request the metadata. This call requires that call to
+ *   finish first, otherwise it will fail
  * 
  *   pisp-app -> pisp-server -> ml-switch -> DFSP
  * 
  * @param {*} options 
  */
 async function getDFSPAccountMetadata() {
+  // TODO: some account details here?
+  const url = `${Config.host}/pisp/accountMetadata`
+  const options = {}
 
-  // TODO: call GET /pisp/accountMetadata, poll while waiting for onUserLoggedIn
-  
+  const rawResponse = await fetch(url, options)
+  return rawResponse.json()
 }
 
+/**
+ * @function lookupParty
+ * @description Lookup the recieving party
+ *
+ *   pisp-app -> pisp-server -> ml-switch -> DFSP
+ *
+ * @param {*} options
+ */
+async function lookupParty() {
+
+  return true
+
+}
+
+/**
+ * @function sendQuote
+ * @description Lookup the recieving party
+ *
+ *   pisp-app -> pisp-server -> ml-switch -> DFSP
+ *
+ * @param {*} options
+ */
+async function sendQuote() {
+
+  //TODO: create the quote
+
+  return true
+
+}
 
 /**
  * @function getQuoteAndPendingAuth
@@ -75,6 +129,11 @@ async function getDFSPAccountMetadata() {
  */
 async function getQuoteAndPendingAuth(quoteRequestOptions) {
   // TODO: call GET /pisp/quoteAndPendingAuth
+  await sleep(1000)
+
+  return {
+    fee: 1
+  }
 }
 
 
@@ -126,17 +185,17 @@ async function getCredServerOptions() {
 async function registerPublicKey(publicKey) {
   //TODO: call POST /fido/register
 
-
   return true;
 }
-
-
-
 
 export default {
   approveTransfer,
   getCredServerOptions,
   getDFSPAccountMetadata,
+  getQuoteAndPendingAuth,
+  lookupParty,
+  mock_loginToDFSP,
   mock_loginToPISP,
   registerPublicKey,
+  sendQuote
 }

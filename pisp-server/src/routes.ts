@@ -9,7 +9,9 @@ const routes = [
     path: '/health',
     handler: async () => ({ "healthy": true }),
   },
-  // Dedicated PISP Endpoints (no passthrough to other systems)
+
+  /* --- PISP Endpoints (outside the scope of the ML API) --- */
+
   {
     method: 'POST',
     path: '/pisp/loginOrSignup',
@@ -59,7 +61,7 @@ const routes = [
   // that could be abstracted away by the SDK Scheme adapter in the future.
   {
     method: 'POST',
-    path: '/ml/onUserLoggedIn',
+    path: '/ml/onDFSPLoginPage',
     handler: MojaloopHandler.onDFSPLoginPage,
   },
   {

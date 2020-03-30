@@ -10,6 +10,7 @@ import {
 const initialState = {
   currentStep: 0,
   dfspLoginStep: 0,
+  sendQuoteStep: 0,
   selectedBank: '',
   accountList: [],
   selectedAccount: '',
@@ -32,7 +33,6 @@ var state = {
   ...initialState
 }
 
-
 /* Page Helpers */
 const pageSections = {
   pispLogin: 0,
@@ -51,6 +51,10 @@ const forms = {
     id: '#dfspLoginForm',
     onSubmitFunc: onDFSPFormSubmit,
   },
+  lookupPartyForm: {
+    id: '#lookupPartyForm',
+    onSubmitFunc: lookupParty,
+  },
   getQuoteForm: {
     id: '#getQuoteForm',
     onSubmitFunc: sendQuote,
@@ -63,10 +67,17 @@ const bankSections = {
   bankSelectAccount: '#bankSelectAccount', // 2
 }
 
+const lookupAndQuoteSections = {
+  lookupParty: '#lookupParty', //0
+  getQuote: '#getQuote', //1
+  sentQuote: '#sentQuote', //2
+}
+
 const dynamicText = {
   loginPromptText: '#loginPromptText',
   selectedBankText: '#selectedBankText',
   linkAccountText: '#linkAccountText',
+  quoteSendToText: '#quoteSendToText',
   transferLine1: '#transferLine1',
   transferLine2: '#transferLine2',
 }
@@ -75,6 +86,7 @@ const dynamicText = {
 const loaders = {
   pispLoginButton: '#pispLoginButtonLoader',
   linkAccountButton: '#linkAccountButtonLoader',
+  lookupQuoteButton: '#lookupQuoteButtonLoader',
   sendQuoteButton: '#sendQuoteButtonLoader',
   transferButtons: '#transferButtonLoader',
 }
@@ -100,6 +112,8 @@ function onPispFormSubmit(formValues) {
 }
 
 function selectBank(bankId) {
+  //TODO: load the login page for the selected bank
+
   setState({
     selectedBank: bankId,
     dfspLoginStep: 1
@@ -109,7 +123,8 @@ function selectBank(bankId) {
 function onDFSPFormSubmit(formValues) {
   //TODO: loaders?
   PISPApi.mock_loginToDFSP(formValues)
-  .then((token) => PISPApi.mock_getDFSPAccountMetadata(token))
+  // TODO: wrap this in a polling function
+  .then((token) => PISPApi.getDFSPAccountMetadata(token))
   .then((accountList) => {
     setState({
       dfspLoginStep: 2,
@@ -143,23 +158,41 @@ async function linkAccount() {
   })
 }
 
-function sendQuote(formValues) { 
-  const getQuote = wrapLoaderFunction(PISPApi.getQuote, 'sendQuoteButton')
+function lookupParty(formValues) {
+  const lookupParty = wrapLoaderFunction(PISPApi.lookupParty, 'lookupPartyButton')
 
-  getQuote(formValues)
+  lookupParty(formValues)
+  .then(result => {
+    // TODO: set the user name here for the quote form
+    setState({
+      sendQuoteStep: 1,
+      payeeMSISDN: formValues.msisdn,
+      // TODO: set the payeeName here
+      // payeeName: result.payeeName,
+    })
+  })
+
+}
+
+function sendQuote(formValues) { 
+  const sendQuote = wrapLoaderFunction(PISPApi.sendQuote, 'sendQuoteButton')
+  const getQuoteAndPendingAuth = wrapLoaderFunction(PISPApi.getQuoteAndPendingAuth, 'sendQuoteButton')
+
+  sendQuote(formValues)
+  // TODO: poll and wait for getQuoteAndPendingAuth
+  .then(() => getQuoteAndPendingAuth())
   .then(quoteResponse => {
     setState({
       currentStep: 4,
-      payeeMSISDN: formValues.msisdn,
+      sendQuoteStep: 2,
       sendAmount: formValues.amount,
-      payeeName: quoteResponse.partyName,
       fee: quoteResponse.fee,
     })
   })
 }
 
 function approveTransfer() {
-  const sendTransfer = wrapLoaderFunction(PISPApi.sendTransfer, 'transferButtons')
+  const sendTransfer = wrapLoaderFunction(PISPApi.approveTransfer, 'transferButtons')
 
   sendTransfer(state.credentialId)
   .then(() => {
@@ -222,10 +255,15 @@ function onStateUpdated(prevState) {
     showDfspLoginStep(state.dfspLoginStep)
   }
 
+  if (prevState.sendQuoteStep !== state.sendQuoteStep) {
+    showQuoteStep(state.sendQuoteStep)
+  }
+
   // Update text
   $(dynamicText.loginPromptText).html(state.pispUsername ? `Hi <b>${state.pispUsername}</b>, please login with your DFSP.` : `Please login to proceed`)
   $(dynamicText.selectedBankText).html(`Login with your details to <b>${state.selectedBank}</b>.`)
   $(dynamicText.linkAccountText).html(`Linking xxxx${state.selectedAccount} with this device.`)
+  $(dynamicText.quoteSendToText).html(`<b>${state.payeeName}</b>`)
   $(dynamicText.transferLine1).html(`You are sending: <b>$${state.sendAmount}</b> to <b>${state.payeeName}</b> at <b>${state.payeeMSISDN}</b>`)
   $(dynamicText.transferLine2).html(`This will cost <b>$${state.fee}</b>, and <b>$${state.sendAmount - state.fee}</b> will reach <b>${state.payeeName}</b>`)
 
@@ -279,6 +317,19 @@ function showDfspLoginStep(activeStep) {
   $(activeStepId).show()
 }
 
+function showQuoteStep(activeStep) {
+  Object.values(lookupAndQuoteSections).forEach(v => $(v).hide())
+  const stepCount = Object.values(lookupAndQuoteSections).length
+
+  //only show the active step if it's in range
+  if (activeStep > Object.values(lookupAndQuoteSections).length || activeStep < 0 ) {
+    return;  
+  }
+  
+  const activeStepId = Object.values(lookupAndQuoteSections)[activeStep]
+  $(activeStepId).show()
+}
+
 function hideLoaders() {
   Object.values(loaders).forEach(v => $(v).hide())
 }
@@ -294,6 +345,7 @@ function init() {
   setState({})
   highlightSection(0, false)
   showDfspLoginStep(0)
+  showQuoteStep(0)
 
   hideLoaders()
 
@@ -327,6 +379,7 @@ $(document).ready(function () {
   const testState = {
     currentStep: 2,
     dfspLoginStep: 4,
+    sendQuoteStep: 0,
     selectedBank: 'BankA',
     selectedAccount: '9876',
     pispUsername: 'sstevens@asthmatickitty.com',
@@ -339,5 +392,5 @@ $(document).ready(function () {
     accountList: [],
   }
 
-  // setState({...testState})
+  setState({...testState})
 });

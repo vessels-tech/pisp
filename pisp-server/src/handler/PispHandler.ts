@@ -12,21 +12,24 @@ import Hapi, { ResponseObject } from '@hapi/hapi'
 async function loginOrSignup(_: any, h: Hapi.ResponseToolkit): Promise<ResponseObject> {
   //Sign in to the PISP app, outside the scope of Mojaloop API
 
+  // TODO: implement 
 
   return h.response(undefined).code(201)
 }
 
 /**
  * @function getDFSPLoginPage
- * @description Gets the login page for the DFSP
+ * @description Gets the login page for the DFSP. Requires onDFSPLoginPage to have been called first.
  *
- *   pisp-server -> ml-switch -> dfsp
+ *   pisp-app ---> pisp-server
  *
  * @param {*} options
  */
 async function getDFSPLoginPage(_: any, h: Hapi.ResponseToolkit): Promise<ResponseObject> {
   // Call the async function, and wait until the onDFSPLoginPage callback is called
   // return the response from onDFSPLoginPage
+
+  // TODO: implement
 
   return h.response(undefined).code(201)
 }
@@ -41,22 +44,8 @@ async function getDFSPLoginPage(_: any, h: Hapi.ResponseToolkit): Promise<Respon
  * @param {*} options
  */
 async function getAccountMetadata(_: any, h: Hapi.ResponseToolkit): Promise<ResponseObject> {
-  /*
-    This endpoint is conditional on user login. Perhaps it should fail
-    if the user hasn't logged in yet
-
-    On the client, side, the easiest thing to do for the demo is poll
-    this and wait until we get an answer back. We'll likely need some controls
-    around how old the data is, but that will be left up to the PISP to implement
-
-    For the purposes of the demo, we will use this endpoint for both the initial 
-    linking and accessing metadata before initiating a transfer, but these 2 things
-    may end up looking different depending on the authorization models we choose to
-    go with
-  */
-
   // TODO: replace with MojaloopApi call
-  // 1. Lookup if we have the token.
+  // 1. Check if we have the token
   // 2. If not, fail with some error code
   // 3. If we do have the token, call MojallopApi.getParty and pass on the token
   // 4. Return the account metadata from getParty

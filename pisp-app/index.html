@@ -103,31 +103,7 @@
       <div id="bankSelectAccount">
         <h5 class="title is-5">Select an account:</h5>
         <div id="bankSelectAccountList" class="tile">
-          <!-- <div style="margin: 1em" class="card notification is-info">
-            <div class="card-content">
-              <p class="title">xxxx9876</p>
-              <p class="subtitle is-5">Savings</p>
-              <p class="title is-6"><b>$1,002.24</b> available</p>
-            </div>
-            <footer class="card-footer">
-              <p class="card-footer-item">
-                <a id='selectAccount9876'>Use this Account</a>
-              </p>
-            </footer>
-          </div> -->
 
-          <!-- <div style="margin: 1em" class="card notification is-danger">
-            <div class="card-content">
-              <p class="title">xxxx1234</p>
-              <p class="subtitle is-5">Spendings</p>
-              <p class="title is-6"><b>$54.13</b> available</p>
-            </div>
-            <footer class="card-footer">
-              <p class="card-footer-item">
-                <a id='selectAccount1234'>Use this Account</a>
-              </p>
-            </footer>
-          </div> -->
         </div>
       </div>
     </div>
@@ -152,33 +128,57 @@
   <section id="sendQuoteSection" class="section">
     <div class="container">
       <a class="anchor" name="3" aria-hidden="true">
-        <h2 class="title is-4"><b>3.</b> Send off a Quote <i>(mocked)</i></h2>
+        <h2 class="title is-4"><b>3.</b> Lookup a Party + Send off a Quote</h2>
       </a>
 
-      <form id="getQuoteForm">
-        <div class="box">
-          <div class="field">
-            <label class="label">MSISDN</label>
-            <div class="control">
-              <input name="msisdn" class="input" type="" placeholder="+61 1234 5678" value="+61 1234 5678">
+      <div id="lookupParty">
+        <form id="lookupPartyForm">
+          <div class="box">
+            <div class="field">
+              <label class="label">MSISDN</label>
+              <div class="control">
+                <input name="msisdn" class="input" type="" placeholder="+61 1234 5678" value="+61 1234 5678">
+              </div>
             </div>
-          </div>
+      
         
-          <div class="field">
-            <label class="label">Amount</label>
             <div class="control">
-              <input name="amount" class="input" type="number" placeholder="$10" value="100">
+              <button id="lookupQuoteButton" class="button is-primary">Lookup Party</button>
+              <div style="width: 5em;" id="lookupQuoteButtonLoader">
+                <progress class="progress is-small is-primary" max="100">15%</progress>
+              </div>
             </div>
           </div>
-        
-          <div class="control">
-            <button id="sendQuoteButton" class="button is-primary">Request Quote</button>
-            <div style="width: 5em;" id="sendQuoteButtonLoader" >
-              <progress class="progress is-small is-primary" max="100">15%</progress>
+        </form>
+      </div>
+
+      <div id="getQuote">
+        <form id="getQuoteForm">
+          <div class="box">
+            <h5 class="title is-6">Sending to: </h5>
+            <h3 id="quoteSendToText" class="subtitle is-4">{{state.payeeName}}</h3>
+          
+            <div class="field">
+              <label class="label">Amount</label>
+              <div class="control">
+                <input name="amount" class="input" type="number" placeholder="$10" value="100">
+              </div>
+            </div>
+          
+            <div class="control">
+              <button id="sendQuoteButton" class="button is-primary">Request Quote</button>
+              <div style="width: 5em;" id="sendQuoteButtonLoader" >
+                <progress class="progress is-small is-primary" max="100">15%</progress>
+              </div>
             </div>
           </div>
-        </div>
-      </form>
+        </form>
+      </div>
+
+      <div id="sentQuote">
+        <h5 class="title is-4">Quote Request Sent</h5>
+      </div>
+
     </div>
   </section>
 
