@@ -207,35 +207,7 @@ function rejectTransfer() {
   console.log("TODO: reject transfer")
 }
 
-
 /* Global State */
-
-/**
- * @description Wrap an async call with "waitForLoader" calls
- */
-function wrapLoaderFunction(myAsyncFunction, buttonId) {
-  waitForLoader(buttonId, true)
-
-  return (...args) => {
-    return myAsyncFunction(...args)
-      .then((result) => {
-        waitForLoader(buttonId, false)
-        return result
-      })
-      .catch(err => {
-        waitForLoader(buttonId, false)
-        // re-throw error to escape
-        throw err
-      })
-  }
-}
-
-function waitForLoader(id, loading = true) {
-  const { loaders } = state;
-  loaders[id] = loading;
-
-  setState({loaders})
-}
 
 function setState(newState) {
   const prevState = JSON.parse(JSON.stringify(state))
@@ -334,13 +306,40 @@ function hideLoaders() {
   Object.values(loaders).forEach(v => $(v).hide())
 }
 
+function waitForLoader(id, loading = true) {
+  const { loaders } = state;
+  loaders[id] = loading;
+
+  setState({ loaders })
+}
+
 /* Util Functions */
 function scrollToAnchor(aid) {
   var aTag = $("a[name='" + aid + "']");
   $('html,body').animate({ scrollTop: aTag.offset().top }, 'slow');
 }
 
+/**
+ * @description Wrap an async call with "waitForLoader" calls
+ */
+function wrapLoaderFunction(myAsyncFunction, buttonId) {
+  waitForLoader(buttonId, true)
 
+  return (...args) => {
+    return myAsyncFunction(...args)
+      .then((result) => {
+        waitForLoader(buttonId, false)
+        return result
+      })
+      .catch(err => {
+        waitForLoader(buttonId, false)
+        // re-throw error to escape
+        throw err
+      })
+  }
+}
+
+/* Main */
 function init() {
   setState({})
   highlightSection(0, false)
@@ -370,8 +369,6 @@ function init() {
   $('#resetDemoBottom').on('click', () => onResetDemo());
 }
 
-
-/* Main */
 $(document).ready(function () {
   init()
 
