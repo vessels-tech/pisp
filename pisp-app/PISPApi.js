@@ -25,13 +25,28 @@ import Config from './Config.js';
  * @param {*} options 
  */
 async function mock_loginToPISP(options) {
-  await sleep(1000);
+  const url = `${Config.host}/pisp/loginOrSignup`
+  const request = new Request(url, {
+    method: 'POST'
+  })
 
-  // TODO: call POST /pisp/loginOrSignup
+  const rawResponse = await fetch(request)
+  return rawResponse.json()
+}
 
-  return {
-    ...options
-  }
+/**
+ * @function getDFSPLoginPage
+ * @param {*} options 
+ */
+async function getDFSPLoginPage() {
+  const url = `${Config.host}/pisp/loginPage/{dfspId}`
+  const request = new Request(url, {
+    method: 'GET'
+  })
+
+  const rawResponse = await fetch(request)
+
+  return true;
 }
 
 /**
@@ -58,16 +73,6 @@ async function mock_loginToDFSP(options) {
 }
 
 /**
- * @function getDFSPLoginPage
- * @param {*} options 
- */
-async function getDFSPLoginPage() {
-
-  // TODO: call GET /pisp/loginPage/{dfspId}
-
-}
-
-/**
  * @function getDFSPAccountMetadata
  * @description After `onUserLoggedIn` is called on the PISP, it 
  *   will request the metadata. This call requires that call to
@@ -78,7 +83,7 @@ async function getDFSPLoginPage() {
  * @param {*} options 
  */
 async function getDFSPAccountMetadata() {
-  // TODO: some account details here?
+  // TODO: include some account details here?
   const url = `${Config.host}/pisp/accountMetadata`
   const options = {}
 
@@ -87,28 +92,35 @@ async function getDFSPAccountMetadata() {
 }
 
 /**
- * @function lookupParty
- * @description Lookup the recieving party
+ * @function lookupParties
+ * @description Lookup the sending and recieving party
  *
  *   pisp-app -> pisp-server -> ml-switch -> DFSP
  *
  * @param {*} options
  */
-async function lookupParty() {
+async function lookupParties() {
+  // TODO: this might need to be 2 separate calls
+  const url = `${Config.host}/pisp/lookupParties`
+  const request = new Request(url, {
+    method: 'GET'
+  })
 
-  return true
+  const rawResponse = await fetch(request)
 
+  return true;
 }
 
 /**
- * @function sendQuote
- * @description Lookup the recieving party
+ * @function createQuote
+ * @description Initiate a quote. 
+ *   Async Call, since we need both the Pending Quote and Pending Auth to continue
  *
  *   pisp-app -> pisp-server -> ml-switch -> DFSP
  *
  * @param {*} options
  */
-async function sendQuote() {
+async function createQuote() {
 
   //TODO: create the quote
 
@@ -136,7 +148,6 @@ async function getQuoteAndPendingAuth(quoteRequestOptions) {
   }
 }
 
-
 /**
  * @function approveTransfer
  * @description Approve the transfer, with the challenge signed by the FIDO
@@ -150,10 +161,42 @@ async function getQuoteAndPendingAuth(quoteRequestOptions) {
  *
  */
 async function approveTransfer(credentialId) {
-  //TODO: call PUT /pisp/transfer/{transferId}
+  // TODO: add body with signed challenge
+  const url = `${Config.host}/pisp/transfer/transfer_1`
+  const request = new Request(url, {
+    method: 'PUT'
+  })
+
+  const rawResponse = await fetch(request)
 
   return true;
 }
+
+/**
+ * @function getTransferStatus
+ * @description Pollable function to check the transfer status
+ *
+ *   pisp-app -> pisp-server
+ *
+ * 
+ * @param {*} getTransferStatus
+ * Note: in this example, we save the credentialId locally, but I think it's more canonical for
+ * the FIDO server to keep track of this for us.  
+ *
+ */
+async function getTransferStatus(credentialId) {
+  // TODO: add body with signed challenge
+  const url = `${Config.host}/pisp/transfer/transfer_1`
+  const request = new Request(url, {
+    method: 'PUT'
+  })
+
+  const rawResponse = await fetch(request)
+
+  return true;
+}
+
+
 
 
 /* ---  FIDO Server Functions --- */
@@ -185,17 +228,27 @@ async function getCredServerOptions() {
 async function registerPublicKey(publicKey) {
   //TODO: call POST /fido/register
 
+  const url = `${Config.host}/fido/register`
+  const request = new Request(url, {
+    method: 'POST'
+  })
+
+  const rawResponse = await fetch(request)
+  return rawResponse.json()
+
   return true;
 }
 
 export default {
   approveTransfer,
+  createQuote,
   getCredServerOptions,
   getDFSPAccountMetadata,
+  getDFSPLoginPage,
   getQuoteAndPendingAuth,
-  lookupParty,
+  getTransferStatus,
+  lookupParties,
   mock_loginToDFSP,
   mock_loginToPISP,
   registerPublicKey,
-  sendQuote
 }

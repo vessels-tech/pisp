@@ -29,6 +29,16 @@ const routes = [
   },
   {
     method: 'GET',
+    path: '/pisp/lookupParties',
+    handler: PispHandler.lookupParties,
+  },
+  {
+    method: 'POST',
+    path: '/pisp/createQuote',
+    handler: PispHandler.createQuote,
+  },
+  {
+    method: 'GET',
     path: '/pisp/quoteAndPendingAuth',
     handler: PispHandler.getQuoteAndPendingAuth,
   },
@@ -36,6 +46,11 @@ const routes = [
     method: 'PUT',
     path: '/pisp/transfer/{transferId}',
     handler: PispHandler.approveTransfer,
+  },
+  {
+    method: 'GET',
+    path: '/pisp/transfer/{transferId}',
+    handler: PispHandler.transferStatus,
   },
 
   /* --- FIDO Passthrough Endpoints --- */

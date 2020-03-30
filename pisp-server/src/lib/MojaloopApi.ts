@@ -14,7 +14,7 @@ export default class MojaloopApi {
   localhost than implemented in the testing toolkit (as with other calls)
 
   TODO: implement:
-  - [ ] getDFSPLoginForm - Gets the login form for the DFSP
+  - [ ] requestDFSPLoginPage - Gets the login form for the DFSP
   - [ ] getDFSPAccountBalancesForLinking - given a short lived token, get the accounts and metadata for the user. This possibly will use the existing GET /parties endpoint...
 
   - [ ] getFIDOOptions - gets the required options for registering a new key with the central-fido
@@ -22,6 +22,16 @@ export default class MojaloopApi {
 
 
 */
+
+  /**
+   * @function requestDFSPLoginPage
+   * @description Async call to DFSP to request login page. Will call the  
+   * 'onDFSPLoginPage' callback with the content
+   */
+  static async requestDFSPLoginPage(opts: any): Promise<any> {
+    //TODO: talk to DFSP, request login page
+    return true;
+  }
 
 
 /* --- Existing Mojaloop Calls --- */
@@ -32,7 +42,6 @@ export default class MojaloopApi {
    *   have to call this because the account should already exist, so we 
    *   might not end up needing it
    */
-
   static async createAccount(opts: any): Promise<any> {
 
     const options = {

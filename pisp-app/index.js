@@ -57,7 +57,7 @@ const forms = {
   },
   getQuoteForm: {
     id: '#getQuoteForm',
-    onSubmitFunc: sendQuote,
+    onSubmitFunc: createQuote,
   },
 }
 
@@ -112,18 +112,21 @@ function onPispFormSubmit(formValues) {
 }
 
 function selectBank(bankId) {
-  //TODO: load the login page for the selected bank
 
-  setState({
-    selectedBank: bankId,
-    dfspLoginStep: 1
+  PISPApi.getDFSPLoginPage(bankId)
+  // TODO: display iframe with login page
+  .then(() => {
+    setState({
+      selectedBank: bankId,
+      dfspLoginStep: 1
+    })
   })
 }
 
 function onDFSPFormSubmit(formValues) {
   //TODO: loaders?
   PISPApi.mock_loginToDFSP(formValues)
-  // TODO: wrap this in a polling function
+  // TODO: wrap this in a polling function? Or should it be syncronous like above?
   .then((token) => PISPApi.getDFSPAccountMetadata(token))
   .then((accountList) => {
     setState({
@@ -143,43 +146,47 @@ function selectAccount(selectedAccount) {
 
 async function linkAccount() {
   const createCredential = wrapLoaderFunction(FidoApi.createCredential, 'linkAccountButton')
+  const registerPublicKey = wrapLoaderFunction(PISPApi.registerPublicKey, 'linkAccountButton')
   const options = {
     name: state.dfspUsername,
     // Maybe this should be the display name of user, not account...
     displayName: state.selectedAccount,
   }
 
+  let _createCredentialResult
   createCredential(options)
-  .then(createCredentialResult => {
+  .then((result) => _createCredentialResult = result)
+  .then(() => registerPublicKey(_createCredentialResult))
+  .then(() => {
     setState({
       currentStep: 3,
-      credentialId: createCredentialResult.id,
+      credentialId: _createCredentialResult.id,
     })
   })
 }
 
 function lookupParty(formValues) {
-  const lookupParty = wrapLoaderFunction(PISPApi.lookupParty, 'lookupPartyButton')
+  const lookupParties = wrapLoaderFunction(PISPApi.lookupParties, 'lookupPartyButton')
 
-  lookupParty(formValues)
+  lookupParties(formValues)
   .then(result => {
     // TODO: set the user name here for the quote form
     setState({
       sendQuoteStep: 1,
       payeeMSISDN: formValues.msisdn,
-      // TODO: set the payeeName here
+      // TODO: set the payeeName here from the result
       // payeeName: result.payeeName,
     })
   })
 
 }
 
-function sendQuote(formValues) { 
-  const sendQuote = wrapLoaderFunction(PISPApi.sendQuote, 'sendQuoteButton')
+function createQuote(formValues) { 
+  const createQuote = wrapLoaderFunction(PISPApi.createQuote, 'sendQuoteButton')
+  // TODO: wrap getQuoteAndPendingAuth in a poll function
   const getQuoteAndPendingAuth = wrapLoaderFunction(PISPApi.getQuoteAndPendingAuth, 'sendQuoteButton')
 
-  sendQuote(formValues)
-  // TODO: poll and wait for getQuoteAndPendingAuth
+  createQuote(formValues)
   .then(() => getQuoteAndPendingAuth())
   .then(quoteResponse => {
     setState({
@@ -193,8 +200,12 @@ function sendQuote(formValues) {
 
 function approveTransfer() {
   const sendTransfer = wrapLoaderFunction(PISPApi.approveTransfer, 'transferButtons')
+  // TODO: poll this
+  const getTransferStatus = wrapLoaderFunction(PISPApi.getTransferStatus, 'transferButtons')
 
   sendTransfer(state.credentialId)
+  // Wait until the transfer status has been updated
+  getTransferStatus()
   .then(() => {
     window.alert("Your money is on its way!")
   })
@@ -389,5 +400,5 @@ $(document).ready(function () {
     accountList: [],
   }
 
-  setState({...testState})
+  // setState({...testState})
 });

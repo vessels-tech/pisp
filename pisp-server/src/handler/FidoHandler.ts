@@ -28,12 +28,23 @@ async function getCredServerOptions(_: any, h: Hapi.ResponseToolkit): Promise<Re
   return h.response(defaultOptions).code(200)
 }
 
+/**
+ * @function registerPublicKey
+ * @description Register the public key from the user's device with the FIDO server
+ *   We also need to s
+ *  
+ * 
+ * @param _ 
+ * @param h 
+ */
 async function registerPublicKey(_: any, h: Hapi.ResponseToolkit): Promise<ResponseObject> {
-  // TODO: save the public key and pass onto fido
+  // TODO:
+  // 1. Save the public key locally
+  // 2. Pass onto the fido with MojaloopApi.registerPublicKey
 
-  //TODO: call MojaloopApi.registerPublicKey
 
-  return h.response(undefined).code(201)
+
+  return h.response({success: true}).code(200)
 }
 
 export default {
